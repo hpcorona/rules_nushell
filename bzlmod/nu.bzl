@@ -20,7 +20,7 @@ _OsArchInfo = provider(
   fields = ['os', 'arch', 'arch_alias', 'suffix', 'binary', 'sha256'],
 )
 
-_VERSION = "0.65.0"
+_VERSION = "0.71.0"
 
 _REPOS = [
   _OsArchInfo(
@@ -74,13 +74,17 @@ _REPOS = [
 ]
 
 def _nu_impl(ctx):
-  repos = [repo for repo in _REPOS if repo.os == ctx.os.name and ctx.os.arch in repo.arch_alias]
+  os_name = ctx.os.name
+  if os_name.startswith('windows'):
+    os_name = 'windows'
+  repos = [repo for repo in _REPOS if repo.os == os_name and ctx.os.arch in repo.arch_alias]
   if len(repos) != 1:
-    fail("no repos found for %s/%s" % (ctx.os.name, ctx.os.arch))
+    fail("no repos found for %s/%s (ctx.os.name = %s)" % (os_name, ctx.os.arch, ctx.os.name))
   repo = repos[0]
+  url = "https://github.com/nushell/nushell/releases/download/%s/nu-%s-%s-%s" % (_VERSION, _VERSION, repo.arch, repo.suffix)
   nu_repo(
     name = "nushell",
-    url = "https://github.com/nushell/nushell/releases/download/%s/nu-%s-%s-%s" % (_VERSION, _VERSION, repo.arch, repo.suffix),
+    url = url,
     sha256 = repo.sha256,
     binary = repo.binary,
   )

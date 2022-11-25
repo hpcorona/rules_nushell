@@ -1,3 +1,4 @@
+@echo off
 rem Copyright 2022 Google LLC
 rem
 rem Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +15,8 @@ rem limitations under the License.
 
 rem Runs the nu binary using windows batch.
 
-{nu_binary} {entry_point} %*
-if errorlevel 1 then goto ERROR
-exit 0
-:ERROR
-exit 1
+setlocal
+set RUNFILES_PATH=%~f0.runfiles\{workspace_name}\
+"%RUNFILES_PATH%{nu_binary}" %RUNFILES_PATH%{entry_point} %*
+endlocal
+if %errorlevel% neq 0 exit /b %errorlevel%

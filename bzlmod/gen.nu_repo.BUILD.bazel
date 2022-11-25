@@ -14,11 +14,22 @@
 
 """Exports the binary file for nushell."""
 
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+
 filegroup(
-  name = "nu_binary",
+  name = "nu_binary_src",
   srcs = [
     "{relative}/{binary}",
   ],
+  visibility = [
+    "//visibility:public",
+  ],
+)
+
+native_binary(
+  name = "nu_binary",
+  src = ":nu_binary_src",
+  out = "native_{binary}",
   visibility = [
     "//visibility:public",
   ],

@@ -16,7 +16,6 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load(":toolchain.bzl", "NuInfo", "nu_toolchain")
-load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 
 bzl_library(
   name = "bzl",
@@ -28,17 +27,11 @@ bzl_library(
   ],
 )
 
-native_binary(
-  name = "nu_binary",
-  src = "@nushell//:nu_binary",
-  out = "nu_binary",
-)
-
 toolchain_type(name = "toolchain_type")
 
 nu_toolchain(
   name = "nu_toolchain",
-  binary = ":nu_binary",
+  binary = "@nushell//:nu_binary",
 )
 
 toolchain(
