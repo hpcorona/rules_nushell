@@ -25,8 +25,3 @@ bzl_library(
     "//visibility:public",
   ],
 )
-
-exports_files([
-  "gen.nu_binary.default.sh",
-  "gen.nu_binary.windows.bat",
-])

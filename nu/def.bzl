@@ -20,20 +20,28 @@ NuModuleInfo = provider(
   fields = ['defaultinfo'],
 )
 
-def _nu_runfiles(ctx, extra_files = [], transitive_files = None):
+def _nu_runfiles(ctx):
   transitive_runfiles = []
+  entry_point = []
+  entry_point_file = []
+  if hasattr(ctx.attr, 'entry_point'):
+    entry_point = [ctx.attr.entry_point]
+    entry_point_file = ctx.files.entry_point
   for runfiles_attr in (
+    entry_point,
     ctx.attr.srcs,
     ctx.attr.data,
-    ctx.attr.deps,
   ):
     for target in runfiles_attr:
+      transitive_runfiles.append(target[DefaultInfo].data_runfiles)
       transitive_runfiles.append(target[DefaultInfo].default_runfiles)
+  for target in ctx.attr.deps:
+    transitive_runfiles.append(target[NuModuleInfo].defaultinfo.data_runfiles)
+    transitive_runfiles.append(target[NuModuleInfo].defaultinfo.default_runfiles)
   runfiles = ctx.runfiles(
-    files = extra_files + ctx.files.srcs + ctx.files.data,
-    transitive_files = transitive_files,
+    files = entry_point_file + ctx.files.srcs + ctx.files.data,
   )
-  runfiles = runfiles.merge_all(transitive_runfiles)
+  runfiles = runfiles.merge_all([r for r in transitive_runfiles if r != None])
   return runfiles
 
 def _nu_module_impl(ctx):
@@ -65,47 +73,32 @@ nu_module = rule(
 )
 
 def _nu_binary_impl(ctx):
-  nu = ctx.toolchains["//toolchain:toolchain_type"].nuinfo
-  (tools, _) = ctx.resolve_tools(tools=[nu.nu_binary])
-  tool_binary = tools.to_list()[0]
+  nu = ctx.toolchains["//toolchain:toolchain_type"].info
 
-  template = ctx.file._template_default
-  output = ctx.attr.name
-  nu_binary_path = tool_binary.short_path
-  entry_point_path = ctx.file.entry_point.short_path
-  if nu.is_windows:
-    template = ctx.file._template_windows
-    output = '%s.bat' % ctx.attr.name
-    nu_binary_path = nu_binary_path.replace('/', '\\')
-    entry_point_path = entry_point_path.replace('/', '\\')
-
-  output_file = ctx.actions.declare_file(output)
-  ctx.actions.expand_template(
-    template = template,
-    output = output_file,
-    substitutions = {
-      "{nu_binary}": nu_binary_path,
-      "{entry_point}": entry_point_path,
-      "{workspace_name}": ctx.workspace_name,
-    },
-    is_executable = True,
+  entry_point_path = ctx.file.entry_point.short_path.replace('/', nu.sep)
+  output_file = nu.nu_runner(
+    ctx,
+    name=ctx.attr.name,
+    args="%s%s" % (nu.env("RUNFILES"), entry_point_path),
+    passthrough_args=ctx.attr.passthrough_args,
   )
 
-  runfiles = _nu_runfiles(
-    ctx = ctx,
-    extra_files = [ctx.file.entry_point],
-    transitive_files = depset([tool_binary]),
-  )
+  runfiles = _nu_runfiles(ctx)
+  default_runfiles = runfiles.merge_all([
+    nu.nu_binary[DefaultInfo].default_runfiles,
+  ])
+
   defaultinfo = DefaultInfo(
     executable = output_file,
-    runfiles = runfiles,
+    runfiles = default_runfiles,
   )
   return [
     defaultinfo,
     NuModuleInfo(
-      defaultinfo = defaultinfo,
+      defaultinfo = DefaultInfo(runfiles=runfiles),
     ),
   ]
+
 
 nu_binary = rule(
   implementation = _nu_binary_impl,
@@ -126,13 +119,8 @@ nu_binary = rule(
       allow_files = True,
       providers = [DefaultInfo, NuModuleInfo],
     ),
-    "_template_windows": attr.label(
-      allow_single_file = True,
-      default = "//nu:gen.nu_binary.windows.bat",
-    ),
-    "_template_default": attr.label(
-      allow_single_file = True,
-      default = "//nu:gen.nu_binary.default.sh",
+    "passthrough_args": attr.bool(
+      default = False,
     ),
   },
   executable = True,

@@ -14,4 +14,5 @@
 
 # Enable bzlmod.
 
-common --experimental_enable_bzlmod --enable_runfiles=true
+build --enable_runfiles=true
+common --enable_bzlmod=true

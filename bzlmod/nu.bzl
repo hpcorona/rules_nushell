@@ -17,14 +17,14 @@
 load(":nu_repo.bzl", "nu_repo")
 
 _OsArchInfo = provider(
-  fields = ['os', 'arch', 'arch_alias', 'suffix', 'binary', 'sha256'],
+  fields = ['name', 'arch', 'arch_alias', 'suffix', 'binary', 'sha256'],
 )
 
-_VERSION = "0.71.0"
+_VERSION = "0.76.0"
 
 _REPOS = [
   _OsArchInfo(
-    os = 'windows',
+    name = 'nushell-windows-x86_64',
     arch = 'x86_64',
     arch_alias = ['x86_64', 'amd64'],
     suffix = 'pc-windows-msvc.zip',
@@ -32,7 +32,7 @@ _REPOS = [
     sha256 = '',
   ),
   _OsArchInfo(
-    os = 'linux',
+    name = 'nushell-linux-arm64',
     arch = 'aarch64',
     arch_alias = ['aarch64'],
     suffix = 'unknown-linux-gnu.tar.gz',
@@ -40,15 +40,7 @@ _REPOS = [
     sha256 = '',
   ),
   _OsArchInfo(
-    os = 'linux',
-    arch = 'armv7',
-    arch_alias = ['armv7'],
-    suffix = 'unknown-linux-gnueabihf.tar.gz',
-    binary = 'nu',
-    sha256 = '',
-  ),
-  _OsArchInfo(
-    os = 'linux',
+    name = 'nushell-linux-x86_64',
     arch = 'x86_64',
     arch_alias = ['x86_64', 'amd64'],
     suffix = 'unknown-linux-gnu.tar.gz',
@@ -56,7 +48,7 @@ _REPOS = [
     sha256 = '',
   ),
   _OsArchInfo(
-    os = 'darwin',
+    name = 'nushell-macos-arm64',
     arch = 'aarch64',
     arch_alias = ['aarch64'],
     suffix = 'apple-darwin.tar.gz',
@@ -64,7 +56,7 @@ _REPOS = [
     sha256 = '',
   ),
   _OsArchInfo(
-    os = 'darwin',
+    name = 'nushell-macos-x86_64',
     arch = 'x86_64',
     arch_alias = ['x86_64', 'amd64'],
     suffix = 'apple-darwin.tar.gz',
@@ -74,20 +66,14 @@ _REPOS = [
 ]
 
 def _nu_impl(ctx):
-  os_name = ctx.os.name
-  if os_name.startswith('windows'):
-    os_name = 'windows'
-  repos = [repo for repo in _REPOS if repo.os == os_name and ctx.os.arch in repo.arch_alias]
-  if len(repos) != 1:
-    fail("no repos found for %s/%s (ctx.os.name = %s)" % (os_name, ctx.os.arch, ctx.os.name))
-  repo = repos[0]
-  url = "https://github.com/nushell/nushell/releases/download/%s/nu-%s-%s-%s" % (_VERSION, _VERSION, repo.arch, repo.suffix)
-  nu_repo(
-    name = "nushell",
-    url = url,
-    sha256 = repo.sha256,
-    binary = repo.binary,
-  )
+  for repo in _REPOS:
+    url = "https://github.com/nushell/nushell/releases/download/%s/nu-%s-%s-%s" % (_VERSION, _VERSION, repo.arch, repo.suffix)
+    nu_repo(
+      name = repo.name,
+      url = url,
+      sha256 = repo.sha256,
+      binary = repo.binary,
+    )
 
 nu = module_extension(
   implementation = _nu_impl,

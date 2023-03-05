@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Provides the "hello" command.
+"""Workspace to test the rules."""
 
-export def hello [name: string] {
-  echo "hello " $name | str collect
-}
+workspace(name = "rules_nushell_tests")

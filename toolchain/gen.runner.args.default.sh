@@ -16,4 +16,20 @@
 
 # Runs the binary using bash.
 
-{nu_binary} {entry_point} $@
+RUNFILES=${RUNFILES:-}
+BUILD_WORKING_DIRECTORY=${BUILD_WORKING_DIRECTORY:-}
+if [[ -z "${RUNFILES}" ]]; then
+  if [[ -z "${BUILD_WORKING_DIRECTORY}" ]]; then
+    SOURCE=${BASH_SOURCE[0]}
+    while [ -L "$SOURCE" ]; do
+      DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+      SOURCE=$(readlink "$SOURCE")
+      [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE
+    done
+    DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+    RUNFILES=${DIR}/{runfiles_path}
+  else
+    RUNFILES=${BUILD_WORKING_DIRECTORY}/{bin_dir}/{runfiles_path}
+  fi
+fi
+NUARGS="$@" exec ${RUNFILES}{nu_binary} {args}

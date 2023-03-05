@@ -13,3 +13,5 @@
 # limitations under the License.
 
 """rules_nushell workspace."""
+
+workspace(name = "rules_nushell")

@@ -12,8 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Provides the "hello" command.
-
-export def hello [name: string] {
-  echo "hello " $name | str collect
-}
+USE_BAZEL_VERSION=6.0.0

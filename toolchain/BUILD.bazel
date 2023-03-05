@@ -15,7 +15,7 @@
 """Package to provide the toolchain for nushell."""
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load(":toolchain.bzl", "NuInfo", "nu_toolchain")
+load(":toolchain.bzl", "define_platform_and_toolchain")
 
 bzl_library(
   name = "bzl",
@@ -29,13 +29,32 @@ bzl_library(
 
 toolchain_type(name = "toolchain_type")
 
-nu_toolchain(
-  name = "nu_toolchain",
-  binary = "@nushell//:nu_binary",
+define_platform_and_toolchain(
+  os = "windows",
+  cpu = "x86_64",
+  extension = "bat",
+  sep = '\\',
+  env_pattern = '%%%s%%',
+  template = '//toolchain:gen.runner.windows.bat',
+  template_args = '//toolchain:gen.runner.args.windows.bat',
 )
 
-toolchain(
-  name = "toolchain",
-  toolchain = ":nu_toolchain",
-  toolchain_type = ":toolchain_type",
+define_platform_and_toolchain(
+  os = "linux",
+  cpu = "x86_64",
+)
+
+define_platform_and_toolchain(
+  os = "linux",
+  cpu = "arm64",
+)
+
+define_platform_and_toolchain(
+  os = "macos",
+  cpu = "x86_64",
+)
+
+define_platform_and_toolchain(
+  os = "macos",
+  cpu = "arm64",
 )

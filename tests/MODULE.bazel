@@ -27,3 +27,6 @@ local_path_override(
   module_name = "rules_nushell",
   path = "..",
 )
+
+nu = use_extension("@rules_nushell//bzlmod:nu.bzl", "nu")
+use_repo(nu)

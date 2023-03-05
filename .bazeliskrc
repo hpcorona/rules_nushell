@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Workspace to test the rules."""
+USE_BAZEL_VERSION=6.0.0

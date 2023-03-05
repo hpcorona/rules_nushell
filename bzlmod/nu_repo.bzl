@@ -32,7 +32,7 @@ def _download_and_resolve_path(ctx):
   return output_path
 
 def _build_file(ctx, output_path, build_template):
-  relative_binary = paths.relativize("%s" % output_path, "%s" % ctx.path(''))
+  relative_binary = paths.relativize('%s' % output_path, '%s' % ctx.path(''))
   ctx.template(
     "%s" % ctx.path("BUILD.bazel"),
     "%s" % build_template,
@@ -44,7 +44,7 @@ def _build_file(ctx, output_path, build_template):
   )
 
 def _nu_repo_impl(ctx):
-  build_template = ctx.path(ctx.attr._build_template)
+  build_template = ctx.path(Label("//bzlmod:gen.nu_repo.BUILD.bazel"))
   output_path = _download_and_resolve_path(ctx)
   _build_file(ctx, output_path, build_template)
 
@@ -59,10 +59,6 @@ nu_repo = repository_rule(
     ),
     "sha256": attr.string(
       mandatory = True,
-    ),
-    "_build_template": attr.label(
-      default = "//bzlmod:gen.nu_repo.BUILD.bazel",
-      allow_single_file = True,
     ),
   },
 )

@@ -15,20 +15,13 @@
 """Exports the binary file for nushell."""
 
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-filegroup(
-  name = "nu_binary_src",
-  srcs = [
-    "{relative}/{binary}",
-  ],
-  visibility = [
-    "//visibility:public",
-  ],
-)
+package(default_visibility=["//visibility:public"])
 
 native_binary(
   name = "nu_binary",
-  src = ":nu_binary_src",
+  src = "{relative}/{binary}",
   out = "native_{binary}",
   visibility = [
     "//visibility:public",

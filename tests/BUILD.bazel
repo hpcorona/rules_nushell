@@ -29,4 +29,5 @@ nu_binary(
   deps = [
     ":module",
   ],
+  passthrough_args=True,
 )

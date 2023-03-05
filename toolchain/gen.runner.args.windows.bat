@@ -16,7 +16,14 @@ rem limitations under the License.
 rem Runs the nu binary using windows batch.
 
 setlocal
-set RUNFILES_PATH=%~f0.runfiles\{workspace_name}\
-"%RUNFILES_PATH%{nu_binary}" %RUNFILES_PATH%{entry_point} %*
+if defined RUNFILES (set RUNFILES=%RUNFILES%) else (
+  if defined BUILD_WORKING_DIRECTORY (
+    set RUNFILES=%BUILD_WORKING_DIRECTORY%/{bin_dir}/{runfiles_path}
+  ) else (
+    set RUNFILES=%~dp0{runfiles_path}
+  )
+)
+set NUARGS=%*
+"%RUNFILES%{nu_binary}" {args}
 endlocal
 if %errorlevel% neq 0 exit /b %errorlevel%
